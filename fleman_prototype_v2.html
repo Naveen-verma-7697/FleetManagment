@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IndiaDrive Rent-a-Car — FLEMAN</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --asphalt:#15181D;
+    --asphalt-2:#1f232a;
+    --paper:#F4F5F1;
+    --card:#FFFFFF;
+    --ink:#1C1F24;
+    --muted:#6b7078;
+    --line:#e3e5e0;
+    --lane:#F5C518;
+    --lane-dark:#c9a004;
+    --hwy:#0B6B3A;
+    --hwy-2:#0e8a4b;
+    --danger:#C0392B;
+    --radius:12px;
+    --shadow:0 1px 2px #0000000a,0 8px 24px -12px #00000026;
+    --shadow-lift:0 2px 4px #00000012,0 18px 38px -14px #00000038;
+    --disp:"Archivo",sans-serif;
+    --body:"IBM Plex Sans",sans-serif;
+    --mono:"IBM Plex Mono",monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);background:var(--paper);color:var(--ink);font-size:15px;line-height:1.5;
+    background-image:radial-gradient(#00000006 1px,transparent 1px);background-size:22px 22px}
+  button{font-family:inherit;cursor:pointer}
+  input,select,textarea{font-family:inherit;font-size:14px}
+  ::selection{background:var(--lane);color:#1b1500}
+
+  /* ---------- header ---------- */
+  header{background:var(--asphalt);color:#fff;position:relative}
+  .topbar{max-width:1080px;margin:0 auto;padding:18px 20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .brand{display:flex;flex-direction:column;line-height:1;cursor:pointer}
+  .brand b{font-family:var(--disp);font-weight:900;font-stretch:115%;font-size:27px;letter-spacing:.5px}
+  .brand b em{font-style:normal;color:var(--lane)}
+  .brand span{font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;color:#9aa0a8;margin-top:5px}
+  .topbar .phone{margin-left:auto;font-family:var(--mono);font-size:13px;color:#cfd3d9}
+  .topbar .phone b{color:var(--lane)}
+
+  /* moving lane divider */
+  .lane-divider{height:8px;background:var(--asphalt-2);position:relative;overflow:hidden}
+  .lane-divider::before{content:"";position:absolute;inset:2px 0;height:4px;
+    background:repeating-linear-gradient(90deg,var(--lane) 0 46px,transparent 46px 80px);
+    animation:drive 2.4s linear infinite;width:200%}
+  @keyframes drive{to{transform:translateX(-80px)}}
+
+  nav{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:40;box-shadow:0 4px 14px -12px #00000030}
+  .navin{max-width:1080px;margin:0 auto;padding:0 12px;display:flex;flex-wrap:wrap;align-items:center}
+  .navbtn{background:none;border:none;padding:14px 15px;font-size:14px;font-weight:500;color:var(--ink);position:relative}
+  .navbtn::after{content:"";position:absolute;left:15px;right:15px;bottom:0;height:3px;background:var(--lane);border-radius:3px 3px 0 0;transform:scaleX(0);transition:transform .22s ease}
+  .navbtn:hover::after{transform:scaleX(.55)}
+  .navbtn.active{font-weight:700}
+  .navbtn.active::after{transform:scaleX(1)}
+  .navspacer{margin-left:auto}
+  .stafflink{font-size:13px;color:var(--hwy);font-weight:700;background:none;border:1.5px solid var(--hwy);border-radius:20px;padding:6px 15px;margin:8px 6px;transition:.2s}
+  .stafflink:hover{background:var(--hwy);color:#fff}
+  .staffbar{display:none;background:linear-gradient(90deg,var(--hwy),var(--hwy-2));color:#fff}
+  .staffbar.on{display:block;animation:slide .3s ease}
+  @keyframes slide{from{transform:translateY(-100%)}to{transform:none}}
+  .staffbar .in{max-width:1080px;margin:0 auto;padding:9px 20px;display:flex;gap:6px;align-items:center;font-size:13px;flex-wrap:wrap}
+  .staffbar button{background:#ffffff1f;border:none;color:#fff;padding:6px 13px;border-radius:16px;font-size:13px;transition:.15s}
+  .staffbar button:hover{background:#ffffff3d;transform:translateY(-1px)}
+  .staffbar .who{margin-left:auto;font-family:var(--mono);font-size:12px;opacity:.9}
+
+  /* ---------- layout ---------- */
+  main{max-width:1080px;margin:0 auto;padding:30px 20px 60px}
+  .screen{display:none}
+  .screen.on{display:block;animation:fade .35s cubic-bezier(.2,.7,.3,1)}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  h1{font-family:var(--disp);font-weight:850;font-stretch:108%;font-size:32px;margin-bottom:5px;letter-spacing:-.01em}
+  .sub{color:var(--muted);margin-bottom:24px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:720px){.grid2,.grid3{grid-template-columns:1fr}}
+  label{display:block;font-size:12.5px;font-weight:600;margin:13px 0 5px;color:#3a3e45}
+  input[type=text],input[type=email],input[type=tel],input[type=date],input[type=time],input[type=password],select,textarea{
+    width:100%;padding:10px 12px;border:1.5px solid #d3d6d0;border-radius:8px;background:#fff;transition:border-color .15s,box-shadow .15s}
+  input:hover,select:hover{border-color:#b9bdb5}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--lane-dark);box-shadow:0 0 0 3px #f5c51840}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:none;border-radius:9px;padding:12px 24px;font-weight:700;font-size:14px;transition:transform .15s,box-shadow .15s,background .15s}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 8px 18px -8px #00000045}
+  .btn:active{transform:translateY(0) scale(.98)}
+  .btn-primary{background:var(--lane);color:#1b1500}
+  .btn-primary:hover{background:#ffd42e}
+  .btn-green{background:var(--hwy);color:#fff}
+  .btn-green:hover{background:var(--hwy-2)}
+  .btn-ghost{background:#fff;border:1.5px solid #cfd2cc;color:var(--ink)}
+  .btn-danger{background:var(--danger);color:#fff}
+  .btnrow{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap}
+  .note{font-size:12.5px;color:var(--muted)}
+
+  /* ---------- milestone stepper ---------- */
+  .steps{display:flex;align-items:flex-start;margin:0 0 30px;position:relative}
+  .steps .track{position:absolute;left:14px;right:14px;top:14px;height:5px;border-radius:3px;background:
+    repeating-linear-gradient(90deg,#c9cbc6 0 14px,transparent 14px 24px)}
+  .steps .fill{position:absolute;left:14px;top:14px;height:5px;border-radius:3px;background:linear-gradient(90deg,var(--hwy),var(--hwy-2));transition:width .5s cubic-bezier(.2,.7,.3,1)}
+  .step{flex:1;text-align:center;position:relative;z-index:1}
+  .dot{width:30px;height:30px;border-radius:50%;background:#fff;border:3px solid #c9cbc6;margin:0 auto 7px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;font-weight:600;color:var(--muted);transition:.3s}
+  .step.done .dot{background:var(--hwy);border-color:var(--hwy);color:#fff}
+  .step.now .dot{background:var(--lane);border-color:var(--lane-dark);color:#1b1500;transform:scale(1.18);box-shadow:0 0 0 6px #f5c51833}
+  .step small{font-size:11px;color:var(--muted);letter-spacing:.02em}
+  .step.now small{color:var(--ink);font-weight:700}
+
+  /* ---------- HOME hero ---------- */
+  .hero{background:var(--asphalt);border-radius:16px;color:#fff;padding:34px 30px 0;margin-bottom:22px;position:relative;overflow:hidden}
+  .hero h2{font-family:var(--disp);font-weight:900;font-stretch:112%;font-size:clamp(26px,4.5vw,44px);line-height:1.05;letter-spacing:-.01em}
+  .hero h2 em{font-style:normal;color:var(--lane)}
+  .hero p{color:#aab0b8;margin-top:10px;max-width:440px;font-size:14.5px}
+  .hero .stats{display:flex;gap:26px;margin:18px 0 22px;flex-wrap:wrap}
+  .hero .stats div{font-family:var(--mono);font-size:13px;color:#8d939c}
+  .hero .stats b{display:block;font-family:var(--disp);font-weight:800;font-size:22px;color:#fff}
+  .road{height:56px;background:var(--asphalt-2);border-radius:12px 12px 0 0;position:relative;overflow:hidden;margin:0 -30px}
+  .road::before{content:"";position:absolute;left:0;top:26px;height:4px;width:200%;
+    background:repeating-linear-gradient(90deg,var(--lane) 0 40px,transparent 40px 72px);animation:drive 1.6s linear infinite}
+  .road .car{position:absolute;top:6px;font-size:30px;animation:cruise 7s linear infinite;filter:drop-shadow(0 6px 4px #0006)}
+  .road .car.c2{animation-duration:9.5s;animation-delay:-4s;top:8px;font-size:24px;opacity:.85}
+  @keyframes cruise{from{left:-60px}to{left:105%}}
+
+  .homegrid{display:grid;grid-template-columns:1.45fr .9fr;gap:20px;align-items:start}
+  @media(max-width:860px){.homegrid{grid-template-columns:1fr}}
+  .promo{display:grid;gap:12px}
+  .deal{background:#fff;border:1px solid var(--line);border-left:5px solid var(--lane);border-radius:10px;padding:14px 16px;font-size:13.5px;box-shadow:var(--shadow);transition:transform .18s,box-shadow .18s}
+  .deal:hover{transform:translateX(4px);box-shadow:var(--shadow-lift)}
+  .deal b{color:var(--hwy);font-family:var(--mono);font-size:13px}
+  .checkline{display:flex;gap:8px;align-items:center;margin-top:15px;font-size:13.5px}
+  .checkline input{width:17px;height:17px;accent-color:var(--hwy)}
+
+  /* ---------- location list ---------- */
+  .loc{display:flex;gap:13px;padding:16px;border:1.5px solid var(--line);border-radius:11px;margin-bottom:11px;background:#fff;cursor:pointer;box-shadow:var(--shadow);transition:transform .18s,border-color .18s,box-shadow .18s;animation:fade .4s both}
+  .loc:nth-child(2){animation-delay:.06s}.loc:nth-child(3){animation-delay:.12s}
+  .loc:hover{transform:translateY(-2px);border-color:var(--lane-dark);box-shadow:var(--shadow-lift)}
+  .loc.sel{border-color:var(--hwy);box-shadow:0 0 0 3px #0b6b3a26,var(--shadow)}
+  .loc input{margin-top:4px;accent-color:var(--hwy)}
+  .loc b{font-size:15px}
+  .loc .code{font-family:var(--mono);font-size:11.5px;color:#fff;background:var(--hwy);font-weight:600;border-radius:5px;padding:2px 7px;margin-left:6px}
+  .loc p{font-size:12.5px;color:var(--muted);margin-top:3px}
+
+  /* ---------- vehicle selection ---------- */
+  .vehrow{display:grid;grid-template-columns:130px 1fr auto;gap:18px;align-items:center;background:#fff;border:1.5px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:13px;box-shadow:var(--shadow);transition:transform .18s,box-shadow .18s,border-color .18s;position:relative;overflow:hidden;animation:fade .4s both}
+  .vehrow:nth-child(2){animation-delay:.05s}.vehrow:nth-child(3){animation-delay:.1s}.vehrow:nth-child(4){animation-delay:.15s}.vehrow:nth-child(5){animation-delay:.2s}
+  .vehrow:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift)}
+  .vehrow.sel{border-color:var(--hwy);box-shadow:0 0 0 3px #0b6b3a22,var(--shadow-lift)}
+  .vehrow::after{content:"";position:absolute;top:0;left:-80%;width:50%;height:100%;transform:skewX(-20deg);background:linear-gradient(90deg,transparent,#ffffff70,transparent);transition:left .6s ease;pointer-events:none}
+  .vehrow:hover::after{left:130%}
+  @media(max-width:680px){.vehrow{grid-template-columns:1fr}}
+  .vehart{height:76px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:38px;position:relative;overflow:hidden}
+  .vehart::after{content:"";position:absolute;left:0;right:0;bottom:9px;height:3px;background:repeating-linear-gradient(90deg,#ffffffb0 0 14px,transparent 14px 26px)}
+  .vehrow:hover .vehart span{animation:vroom .5s ease}
+  @keyframes vroom{30%{transform:translateX(7px) }60%{transform:translateX(-3px)}}
+  .vehcls{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--hwy);font-weight:800}
+  .vehname{font-family:var(--disp);font-weight:750;font-size:18px}
+  .vehmeta{font-size:12.5px;color:var(--muted)}
+  .rates{display:flex;gap:18px;margin-top:9px}
+  .rates div{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  .rates b{display:block;font-family:var(--mono);font-size:15px;color:var(--ink);letter-spacing:0;text-transform:none}
+  .vehstat{font-weight:800;font-size:12px;letter-spacing:.12em;text-transform:uppercase;border-radius:6px;padding:6px 12px}
+  .sold{color:var(--danger);background:#c0392b14} .na{color:var(--muted);background:#6b707814}
+
+  /* ---------- addons ---------- */
+  .addon{display:flex;align-items:center;gap:13px;background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:16px;margin-bottom:11px;transition:.18s;cursor:pointer}
+  .addon:hover{border-color:var(--lane-dark);transform:translateX(3px)}
+  .addon:has(input:checked){border-color:var(--hwy);background:#0b6b3a08}
+  .addon input[type=checkbox]{width:19px;height:19px;accent-color:var(--hwy)}
+  .addon b{flex:1}
+  .addon .price{font-family:var(--mono);font-size:14px}
+  .addon select{width:72px}
+
+  /* ---------- booking summary sidebar ---------- */
+  .split{display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start}
+  @media(max-width:860px){.split{grid-template-columns:1fr}}
+  .summary{background:var(--asphalt);color:#fff;border-radius:var(--radius);padding:20px;font-size:13px;position:sticky;top:64px;box-shadow:var(--shadow-lift)}
+  .summary h4{font-family:var(--disp);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--lane);margin-bottom:12px}
+  .summary .row{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed #3a3f47}
+  .summary .row span{color:#9aa0a8}
+  .summary .row div{text-align:right}
+  .summary .tot{border:none;padding-top:12px;font-size:15px;align-items:center}
+  .summary .tot b{font-family:var(--mono);color:var(--lane);font-size:20px}
+
+  /* ---------- number plate (signature) ---------- */
+  .plate{display:inline-flex;align-items:center;gap:15px;background:#fff;border:3.5px solid var(--ink);border-radius:11px;padding:13px 30px;margin:18px 0;box-shadow:0 5px 0 #00000026,var(--shadow-lift);animation:stamp .55s cubic-bezier(.2,1.4,.4,1) both}
+  @keyframes stamp{0%{opacity:0;transform:scale(1.7) rotate(-4deg)}60%{opacity:1;transform:scale(.96)}100%{transform:none}}
+  .plate .ind{font-family:var(--disp);font-weight:900;font-size:11px;color:#fff;background:#003399;padding:7px 7px;border-radius:5px;letter-spacing:.05em;line-height:1.25;text-align:center}
+  .plate .no{font-family:var(--mono);font-weight:600;font-size:31px;letter-spacing:.13em}
+  .confirmwrap{text-align:center;padding:38px 20px;position:relative;overflow:hidden}
+  .tick{width:62px;height:62px;border-radius:50%;background:var(--hwy);color:#fff;font-size:30px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;animation:pop .5s cubic-bezier(.2,1.6,.4,1) both .1s;box-shadow:0 0 0 10px #0b6b3a1c}
+  @keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+  .confetti{position:absolute;top:-10px;font-size:15px;animation:confall 2.6s ease-in forwards;pointer-events:none}
+  @keyframes confall{to{transform:translateY(420px) rotate(540deg);opacity:0}}
+
+  /* ---------- tables ---------- */
+  table{width:100%;border-collapse:collapse;background:#fff;font-size:13.5px}
+  th{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;text-align:left;color:var(--muted);border-bottom:2.5px solid var(--ink);padding:10px}
+  td{padding:10px;border-bottom:1px solid var(--line)}
+  tr:hover td{background:#fafaf7}
+  td.mono,.mono{font-family:var(--mono);font-size:13px}
+
+  /* ---------- modal ---------- */
+  .overlay{display:none;position:fixed;inset:0;background:#000b;z-index:50;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px)}
+  .overlay.on{display:flex;animation:ovfade .2s ease}
+  @keyframes ovfade{from{opacity:0}}
+  .modal{background:#fff;border-radius:14px;max-width:450px;width:100%;padding:26px;box-shadow:var(--shadow-lift);animation:mup .3s cubic-bezier(.2,1.2,.4,1)}
+  @keyframes mup{from{opacity:0;transform:translateY(24px) scale(.97)}}
+  .modal h3{font-family:var(--disp);font-size:19px;margin-bottom:12px}
+  .fuel{display:flex;gap:8px;margin:8px 0}
+  .fuel label{margin:0}
+  .fuel input{display:none}
+  .fuel span{display:inline-block;padding:8px 15px;border:1.5px solid #cfd2cc;border-radius:8px;font-weight:600;cursor:pointer;transition:.15s}
+  .fuel input:checked+span{background:var(--hwy);border-color:var(--hwy);color:#fff}
+  .fuel span:hover{border-color:var(--hwy)}
+
+  footer{background:var(--asphalt);color:#8d939c;font-size:12.5px;margin-top:44px}
+  footer .in{max-width:1080px;margin:0 auto;padding:22px 20px;display:flex;gap:18px;flex-wrap:wrap}
+  footer a{color:#c9cdd3;text-decoration:none;transition:.15s}
+  footer a:hover{color:var(--lane)}
+  .toast{position:fixed;bottom:-80px;left:50%;transform:translateX(-50%);background:var(--asphalt);color:#fff;padding:12px 22px;border-radius:10px;font-size:13.5px;z-index:60;border-left:4px solid var(--lane);box-shadow:var(--shadow-lift);transition:bottom .35s cubic-bezier(.2,1,.4,1)}
+  .toast.on{bottom:22px}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="topbar">
+    <div class="brand" onclick="go('home')"><b>INDIA<em>DRIVE</em></b><span>Rent-a-Car · FLEMAN</span></div>
+    <div class="phone">Book online or call <b>1-800-DRIVE</b></div>
+  </div>
+  <div class="lane-divider"></div>
+  <nav><div class="navin">
+    <button class="navbtn active" data-nav="home" onclick="go('home')">Home</button>
+    <button class="navbtn" data-nav="modify" onclick="go('modify')">Modify / Cancel Booking</button>
+    <button class="navbtn" data-nav="member" onclick="go('member')">Membership Registration</button>
+    <button class="navbtn" data-nav="about" onclick="go('about')">About IndiaDrive</button>
+    <button class="navbtn" data-nav="care" onclick="go('care')">Customer Care</button>
+    <span class="navspacer"></span>
+    <button class="stafflink" id="staffLink" onclick="staffToggle()">Staff Login</button>
+  </div></nav>
+  <div class="staffbar" id="staffbar"><div class="in">
+    <b>Staff:</b>
+    <button onclick="go('home');toast('On-spot booking — pickup fixed to today at your hub')">Booking</button>
+    <button onclick="go('modify')">Cancellation</button>
+    <button onclick="openHandover()">Hand-over</button>
+    <button onclick="go('return')">Return</button>
+    <span class="who">staff_mumbai · Mumbai Airport Hub</span>
+  </div></div>
+</header>
+
+<main>
+
+<!-- ============ HOME ============ -->
+<section class="screen on" id="scr-home">
+  <div class="hero">
+    <h2>Pick a car.<br><em>Hit the road.</em></h2>
+    <p>Airport pick-ups, one-way returns and 24×7 hubs across Mumbai, Pune, Bengaluru and Delhi.</p>
+    <div class="stats">
+      <div><b data-count="120">0</b>vehicles</div>
+      <div><b data-count="4">0</b>city hubs</div>
+      <div><b data-count="18500">0</b>happy trips</div>
+    </div>
+    <div class="road"><span class="car">🚙</span><span class="car c2">🚗</span></div>
+  </div>
+
+  <div class="homegrid">
+    <div class="card">
+      <h1 style="font-size:22px">Make a reservation</h1>
+      <div class="grid2" style="margin-top:6px">
+        <div><label>Rental date &amp; time</label>
+          <div class="grid2" style="gap:8px"><input type="date" id="pkDate" value="2026-07-20"><input type="time" id="pkTime" value="11:00"></div>
+        </div>
+        <div><label>Return date &amp; time</label>
+          <div class="grid2" style="gap:8px"><input type="date" id="rtDate" value="2026-07-23"><input type="time" id="rtTime" value="11:00"></div>
+        </div>
+      </div>
+
+      <label>Pick-up location</label>
+      <div class="grid3" style="gap:8px">
+        <input type="text" id="pkAir" placeholder="Airport code e.g. BOM" maxlength="3" style="text-transform:uppercase">
+        <input type="text" id="pkCity" placeholder="or State / City e.g. Mumbai">
+        <button class="btn btn-ghost" onclick="searchLoc('pickup')">Find location</button>
+      </div>
+
+      <div class="checkline">
+        <input type="checkbox" id="diffReturn" onchange="document.getElementById('retBlock').style.display=this.checked?'block':'none'">
+        <label for="diffReturn" style="margin:0;font-weight:500">I may return the car to a different location</label>
+      </div>
+
+      <div id="retBlock" style="display:none">
+        <label>Return location</label>
+        <div class="grid3" style="gap:8px">
+          <input type="text" id="rtAir" placeholder="Airport code" maxlength="3" style="text-transform:uppercase">
+          <input type="text" id="rtCity" placeholder="or State / City">
+          <button class="btn btn-ghost" onclick="searchLoc('return')">Find location</button>
+        </div>
+      </div>
+
+      <div class="btnrow">
+        <button class="btn btn-primary" onclick="continueFromHome()">Continue booking →</button>
+      </div>
+      <p class="note" style="margin-top:10px">Tip: leave the fields empty and press Continue to browse all Mumbai locations.</p>
+    </div>
+
+    <aside class="promo">
+      <div class="deal"><b>WEEKEND20</b><br>20% off SUVs on 3+ day rentals this monsoon.</div>
+      <div class="deal"><b>MEMBER PERK</b><br>Free GPS add-on on every member booking.</div>
+      <div class="deal"><b>HOTEL COMBO</b><br>Flat ₹500 off at affiliated partner stays.</div>
+      <div class="deal"><b>ONE-WAY</b><br>Return the car at any hub — Mumbai ⇄ Pune most loved.</div>
+    </aside>
+  </div>
+</section>
+
+<!-- ============ SELECT LOCATION ============ -->
+<section class="screen" id="scr-location">
+  <div class="steps" id="steps1"></div>
+  <h1>Select a location</h1>
+  <p class="sub" id="locSub"></p>
+  <div id="locList"></div>
+  <div class="btnrow">
+    <button class="btn btn-primary" onclick="afterLocation()">Continue booking →</button>
+    <button class="btn btn-ghost" onclick="go('home')">Cancel</button>
+  </div>
+</section>
+
+<!-- ============ VEHICLE SELECTION ============ -->
+<section class="screen" id="scr-vehicle">
+  <div class="steps" id="steps2"></div>
+  <h1>Choose your car</h1>
+  <p class="sub">Base rates per class — availability is live for your dates.</p>
+  <div id="vehList"></div>
+  <div class="btnrow">
+    <button class="btn btn-primary" onclick="afterVehicle()">Continue booking →</button>
+    <button class="btn btn-ghost" onclick="go('home')">Cancel</button>
+  </div>
+</section>
+
+<!-- ============ ADD-ONS ============ -->
+<section class="screen" id="scr-addons">
+  <div class="steps" id="steps3"></div>
+  <h1>Rental add-ons</h1>
+  <p class="sub">"At cost" items, billed per day — not included in the base fare.</p>
+  <div class="card" style="max-width:640px">
+    <label class="addon"><input type="checkbox" id="ad-gps"><b>🧭 GPS Navigation System</b><span class="price">₹300 / day</span></label>
+    <label class="addon"><input type="checkbox" id="ad-camp"><b>⛺ Camping Kit</b><span class="price">₹900 / day</span></label>
+    <label class="addon"><input type="checkbox" id="ad-seat"><b>👶 Child Seats</b><span class="price">₹100 / day <span class="note">(1st free)</span></span>
+      <select id="ad-seat-n" onclick="event.stopPropagation()"><option>1</option><option>2</option><option>3</option></select>
+    </label>
+  </div>
+  <div class="btnrow">
+    <button class="btn btn-primary" onclick="afterAddons()">Continue booking →</button>
+    <button class="btn btn-ghost" onclick="go('home')">Cancel</button>
+  </div>
+</section>
+
+<!-- ============ CUSTOMER INFO ============ -->
+<section class="screen" id="scr-customer">
+  <div class="steps" id="steps4"></div>
+  <h1>Renter's information</h1>
+  <p class="sub">Members: enter your membership number to auto-fill your details.</p>
+  <div class="split">
+    <aside class="summary" id="sideSummary"></aside>
+    <div class="card">
+      <div class="grid3">
+        <div><label>Membership no</label><input type="text" id="memNo" placeholder="IDM-1024"></div>
+        <div><label>Password</label><input type="password" placeholder="••••••••"></div>
+        <div style="align-self:end"><button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="fillMember()">Go</button></div>
+      </div>
+      <div class="grid2">
+        <div><label>First name</label><input type="text" id="cFirst" placeholder="Asha"></div>
+        <div><label>Last name</label><input type="text" id="cLast" placeholder="Kulkarni"></div>
+      </div>
+      <label>Address line 1</label><input type="text" id="cAddr" placeholder="14, Shivaji Park Road">
+      <label>Address line 2</label><input type="text" placeholder="Dadar West">
+      <div class="grid3">
+        <div><label>City</label><input type="text" id="cCity" placeholder="Mumbai"></div>
+        <div><label>ZIP</label><input type="text" placeholder="400028"></div>
+        <div><label>Email id</label><input type="email" id="cEmail" placeholder="asha@example.com"></div>
+      </div>
+      <div class="grid2">
+        <div><label>Home phone</label><input type="tel" placeholder="022-2444xxxx"></div>
+        <div><label>Cell</label><input type="tel" id="cCell" placeholder="98200xxxxx"></div>
+      </div>
+      <div class="grid3">
+        <div><label>Driving licence no</label><input type="text" id="cDL" placeholder="MH01 20240012345"></div>
+        <div><label>Issued by</label><input type="text" placeholder="RTO Mumbai Central"></div>
+        <div><label>Valid thru</label><input type="date" value="2030-05-31"></div>
+      </div>
+      <div class="grid3">
+        <div><label>Credit card type</label><select><option>Visa</option><option>Mastercard</option><option>RuPay</option></select></div>
+        <div><label>Card no</label><input type="text" placeholder="xxxx xxxx xxxx 4021"></div>
+        <div><label>Date of birth</label><input type="date" value="1998-03-14"></div>
+      </div>
+      <div class="grid2">
+        <div><label>IDP # <span class="note">(optional)</span></label><input type="text"></div>
+        <div><label>Passport no <span class="note">(optional)</span></label><input type="text"></div>
+      </div>
+      <div class="btnrow">
+        <button class="btn btn-primary" onclick="afterCustomer()">Continue booking →</button>
+        <button class="btn btn-ghost" onclick="go('home')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONFIRM BOOKING ============ -->
+<section class="screen" id="scr-confirm">
+  <div class="steps" id="steps5"></div>
+  <h1>Confirm your booking</h1>
+  <p class="sub">Check everything once — Modify restarts the booking with your data retained.</p>
+  <div class="card"><div id="confirmTable"></div></div>
+  <div class="btnrow">
+    <button class="btn btn-green" onclick="confirmBooking()">Confirm booking ✓</button>
+    <button class="btn btn-ghost" onclick="go('home')">Modify</button>
+  </div>
+</section>
+
+<!-- ============ BOOKED ============ -->
+<section class="screen" id="scr-booked">
+  <div class="card confirmwrap" id="bookedCard">
+    <div class="tick">✓</div>
+    <h1>You're booked!</h1>
+    <p class="sub">Your confirmation number — also mailed to <span id="bkEmail">asha@example.com</span></p>
+    <div class="plate" id="plateBox"><span class="ind">IND<br>🛞</span><span class="no" id="plateNo">FLE 26 · 4821</span></div>
+    <p class="note">Quote this number at pick-up, or use it to modify / cancel your booking anytime.</p>
+    <div class="btnrow" style="justify-content:center">
+      <button class="btn btn-primary" onclick="go('home')">Book another car</button>
+      <button class="btn btn-ghost" onclick="go('modify')">Modify / Cancel</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MODIFY / CANCEL ============ -->
+<section class="screen" id="scr-modify">
+  <h1>Modify or cancel a booking</h1>
+  <p class="sub">Enter your booking confirmation number and we'll fetch the record.</p>
+  <div class="card" style="max-width:560px">
+    <label>Booking confirmation no</label>
+    <div class="grid2" style="grid-template-columns:1fr auto">
+      <input type="text" id="findNo" placeholder="FLE 26 · 4821">
+      <button class="btn btn-primary" onclick="fetchBooking()">Fetch record</button>
+    </div>
+  </div>
+  <div id="fetched" style="display:none;margin-top:16px">
+    <div class="card"><div id="fetchedTable"></div>
+      <div class="btnrow">
+        <button class="btn btn-ghost" onclick="toast('Modify restarts the booking flow with your saved data');go('home')">Modify</button>
+        <button class="btn btn-danger" onclick="openCancel()">Cancel booking</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MEMBERSHIP ============ -->
+<section class="screen" id="scr-member">
+  <h1>Membership registration</h1>
+  <p class="sub">Members get faster checkout — your details auto-fill on every booking.</p>
+  <div class="card" style="max-width:680px">
+    <div class="grid2">
+      <div><label>First name</label><input type="text" id="mFirst" placeholder="Asha"></div>
+      <div><label>Last name</label><input type="text" placeholder="Kulkarni"></div>
+    </div>
+    <label>Address line 1</label><input type="text" placeholder="14, Shivaji Park Road">
+    <div class="grid3">
+      <div><label>City</label><input type="text" placeholder="Mumbai"></div>
+      <div><label>ZIP</label><input type="text" placeholder="400028"></div>
+      <div><label>Email id</label><input type="email" id="mEmail" placeholder="asha@example.com"></div>
+    </div>
+    <div class="grid3">
+      <div><label>Driving licence</label><input type="text" placeholder="MH01 20240012345"></div>
+      <div><label>Birth date</label><input type="date"></div>
+      <div><label>Preferred car type</label><select><option>Small Cars</option><option>Compact Cars</option><option>Intermediate</option><option>Sedan</option><option>SUV</option></select></div>
+    </div>
+    <div class="btnrow">
+      <button class="btn btn-green" onclick="registerMember()">Submit</button>
+      <button class="btn btn-ghost" onclick="toast('Form cleared')">Clear</button>
+    </div>
+    <div id="memResult" style="display:none;margin-top:16px">
+      <p>Welcome aboard! Your membership number:</p>
+      <div class="plate"><span class="ind">IND<br>🛞</span><span class="no">IDM · 1024</span></div>
+      <p class="note">Also mailed to you. Use it with your password at checkout.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RETURN (staff) ============ -->
+<section class="screen" id="scr-return">
+  <h1>Process return</h1>
+  <p class="sub">Invoice preview for booking <b class="mono">FLE 26 · 4821</b> — vehicle <b class="mono">MH01CD5678</b></p>
+  <div class="card" style="max-width:660px">
+    <table>
+      <tr><th>Item</th><th>Detail</th><th style="text-align:right">Amount</th></tr>
+      <tr><td>Base fare</td><td>Compact · Hyundai i20 · 3 days × ₹1,800</td><td class="mono" style="text-align:right">₹5,400</td></tr>
+      <tr><td>Add-ons</td><td>GPS 3 days × ₹300</td><td class="mono" style="text-align:right">₹900</td></tr>
+      <tr><td>Extra charges</td><td>42 extra km · fuel ½ → ¼</td><td class="mono" style="text-align:right">₹760</td></tr>
+      <tr><td colspan="2"><b>Total (Invoice INV-2026-0117)</b></td><td class="mono" style="text-align:right"><b>₹7,060</b></td></tr>
+    </table>
+    <div class="btnrow">
+      <button class="btn btn-green" onclick="openReturn()">Process return</button>
+      <button class="btn btn-ghost" onclick="toast('Invoice PDF mailed to customer')">Email invoice (.PDF)</button>
+      <button class="btn btn-ghost" onclick="toast('Sent to printer')">Print invoice</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ABOUT / CARE ============ -->
+<section class="screen" id="scr-about">
+  <h1>About IndiaDrive</h1>
+  <p class="sub">Rent-a-Car since 2008 · 4 hubs · 120+ vehicles</p>
+  <div class="grid3">
+    <div class="card"><b>History</b><p class="note" style="margin-top:6px">Started at Mumbai airport with 6 Altos; today we cover Mumbai, Pune, Bengaluru and Delhi.</p></div>
+    <div class="card"><b>Financial results</b><p class="note" style="margin-top:6px">FY 2025–26 revenue ₹18.4 Cr, fleet utilisation 78%. Last balance sheet on request.</p></div>
+    <div class="card"><b>Management</b><p class="note" style="margin-top:6px">Board of 5, led by our founder-CEO. Ops teams at every hub run hand-over and return.</p></div>
+  </div>
+</section>
+
+<section class="screen" id="scr-care">
+  <h1>Customer care</h1>
+  <p class="sub">We reply within one working day.</p>
+  <div class="split" style="grid-template-columns:1fr 1.2fr">
+    <div class="card">
+      <b>Customer Care Dept.</b>
+      <p class="note" style="margin-top:8px">T2 Arrival, CSMIA, Mumbai 400099<br>Phone 022-1111-2222 · Fax 022-1111-2223<br>Toll free <b>1-800-DRIVE</b><br>care@indiadrive.example</p>
+    </div>
+    <div class="card">
+      <label>Your name</label><input type="text" placeholder="Asha Kulkarni">
+      <label>Email</label><input type="email" placeholder="asha@example.com">
+      <label>Comments / suggestions</label><textarea rows="4" placeholder="Tell us what happened…"></textarea>
+      <div class="btnrow"><button class="btn btn-primary" onclick="toast('Thank you! Your enquiry has been recorded.')">Send</button></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ MODALS ============ -->
+<div class="overlay" id="ovCancel"><div class="modal">
+  <h3>Cancel this booking?</h3>
+  <p class="note">Do you really want to cancel your booking? The vehicle will be released for further bookings.</p>
+  <div class="btnrow">
+    <button class="btn btn-danger" onclick="doCancel()">Yes, cancel booking</button>
+    <button class="btn btn-ghost" onclick="ovClose('ovCancel')">Keep booking</button>
+  </div>
+</div></div>
+
+<div class="overlay" id="ovHandover"><div class="modal">
+  <h3>Hand-over vehicle</h3>
+  <label>Booking confirmation no</label><input type="text" value="FLE 26 · 4821">
+  <label>Vehicle reg no</label>
+  <select><option>MH01CD5678 — Hyundai i20 · Red (available)</option><option>MH01AB1234 — Maruti Alto · White (available)</option></select>
+  <label>Car status</label><textarea rows="2" placeholder="Clean, no visible damage, documents in glovebox"></textarea>
+  <label>Fuel status</label>
+  <div class="fuel">
+    <label><input type="radio" name="fuel"><span>¼</span></label>
+    <label><input type="radio" name="fuel" checked><span>½</span></label>
+    <label><input type="radio" name="fuel"><span>¾</span></label>
+    <label><input type="radio" name="fuel"><span>Full</span></label>
+  </div>
+  <p class="note">Available = physically at hub, not allotted, and no inspection due in the rental period.</p>
+  <div class="btnrow">
+    <button class="btn btn-green" onclick="ovClose('ovHandover');toast('Vehicle allotted — pickup set to today, now')">Done</button>
+    <button class="btn btn-ghost" onclick="ovClose('ovHandover')">Cancel</button>
+  </div>
+</div></div>
+
+<div class="overlay" id="ovReturn"><div class="modal">
+  <h3>Confirm return</h3>
+  <label>Vehicle reg no</label><input type="text" value="MH01CD5678" readonly style="background:#f2f2ef">
+  <label>Damage notes</label><textarea rows="2" placeholder="Minor scratch, rear-left bumper"></textarea>
+  <label>Fuel status</label>
+  <div class="fuel">
+    <label><input type="radio" name="fuel2" checked><span>¼</span></label>
+    <label><input type="radio" name="fuel2"><span>½</span></label>
+    <label><input type="radio" name="fuel2"><span>¾</span></label>
+    <label><input type="radio" name="fuel2"><span>Full</span></label>
+  </div>
+  <div class="btnrow">
+    <button class="btn btn-green" onclick="ovClose('ovReturn');toast('Return recorded — invoice mailed, vehicle available again')">Done</button>
+    <button class="btn btn-ghost" onclick="ovClose('ovReturn')">Cancel</button>
+  </div>
+</div></div>
+
+<footer><div class="in">
+  <a href="#" onclick="go('about');return false">About</a>
+  <a href="#" onclick="toast('Affiliated hotels — partner deals');return false">Affiliated Hotels</a>
+  <a href="#" onclick="toast('Opens weather.com');return false">Weather</a>
+  <a href="#" onclick="go('care');return false">Contact Us</a>
+  <a href="#" onclick="toast('Site map');return false">Site Map</a>
+  <a href="#" onclick="toast('Careers — current openings');return false">Career</a>
+  <span style="margin-left:auto">© IndiaDrive · Copyrights and disclaimer statement</span>
+</div></footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------------- STATIC DATA ---------------- */
+const LOCATIONS=[
+ {code:"BOM",name:"IndiaDrive Mumbai Airport Hub",addr:"T2 Arrival, CSMIA, Mumbai 400099",ph:"022-1111-2222",hrs:"Mon–Sun 06:00 AM – 11:00 PM"},
+ {code:"AND",name:"IndiaDrive Andheri City Office",addr:"Andheri East, Mumbai 400069",ph:"022-3333-4444",hrs:"Mon–Sat 09:00 AM – 08:00 PM"},
+ {code:"DDR",name:"IndiaDrive Dadar Station Point",addr:"Senapati Bapat Marg, Dadar, Mumbai 400028",ph:"022-5555-6666",hrs:"Mon–Sun 07:00 AM – 10:00 PM"}
+];
+const CARS=[
+ {cls:"Small Cars",name:"Maruti Alto or similar",icon:"🚗",g:"linear-gradient(135deg,#2b3140,#414b61)",fuel:"Petrol",seats:4,d:1200,w:7500,m:28000,st:"ok"},
+ {cls:"Compact Cars",name:"Hyundai i20 or similar",icon:"🚙",g:"linear-gradient(135deg,#3b2f2f,#6b4a3a)",fuel:"Petrol",seats:5,d:1800,w:11000,m:40000,st:"ok"},
+ {cls:"Intermediate",name:"Honda City or similar",icon:"🚘",g:"linear-gradient(135deg,#1f3a33,#2f6b57)",fuel:"Petrol",seats:5,d:2500,w:15500,m:56000,st:"ok"},
+ {cls:"Sedan",name:"Skoda Slavia or similar",icon:"🚖",g:"linear-gradient(135deg,#33305a,#5a548f)",fuel:"Petrol",seats:5,d:3000,w:19000,m:70000,st:"sold"},
+ {cls:"SUV",name:"Hyundai Creta or similar",icon:"🚐",g:"linear-gradient(135deg,#4a2b33,#7a4550)",fuel:"Diesel",seats:5,d:3500,w:22000,m:82000,st:"na"}
+];
+const STEPS=["Location","Vehicle","Add-ons","Your info","Confirm"];
+const fmt=n=>"₹"+n.toLocaleString("en-IN");
+let B={locIdx:0,carIdx:1,addons:[],days:3};
+
+/* ---------------- NAV ---------------- */
+function go(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on"));
+  document.getElementById("scr-"+id).classList.add("on");
+  document.querySelectorAll(".navbtn").forEach(b=>b.classList.toggle("active",b.dataset.nav===id));
+  window.scrollTo({top:0});
+}
+function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("on");clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove("on"),2600)}
+function ovClose(id){document.getElementById(id).classList.remove("on")}
+
+/* ---------------- HERO COUNTERS ---------------- */
+document.querySelectorAll("[data-count]").forEach(el=>{
+  const end=+el.dataset.count,t0=performance.now();
+  (function tick(t){const p=Math.min(1,(t-t0)/1300);
+    el.textContent=Math.round(end*(1-Math.pow(1-p,3))).toLocaleString("en-IN")+(end>=1000?"+":"");
+    if(p<1)requestAnimationFrame(tick)})(t0);
+});
+
+/* ---------------- STEPPER ---------------- */
+function drawSteps(now){
+  const pct=now/(STEPS.length-1)*100;
+  const html=`<div class="track"></div><div class="fill" style="width:calc((100% - 28px) * ${now}/${STEPS.length-1})"></div>`+
+    STEPS.map((s,i)=>`<div class="step ${i<now?"done":i===now?"now":""}"><div class="dot">${i<now?"✓":i+1}</div><small>${s}</small></div>`).join("");
+  for(let k=1;k<=5;k++){const el=document.getElementById("steps"+k);if(el)el.innerHTML=html;}
+}
+
+/* ---------------- FLOW ---------------- */
+function days(){
+  const a=new Date(document.getElementById("pkDate").value),b=new Date(document.getElementById("rtDate").value);
+  return Math.max(1,Math.round((b-a)/86400000));
+}
+function continueFromHome(){B.days=days();searchLoc("pickup")}
+function searchLoc(kind){
+  const q=document.getElementById(kind==="pickup"?"pkCity":"rtCity").value||document.getElementById(kind==="pickup"?"pkAir":"rtAir").value||"Mumbai";
+  document.getElementById("locSub").innerHTML=`Your location description <b>${q}</b> has <b>${LOCATIONS.length}</b> matches. Please select one.`;
+  document.getElementById("locList").innerHTML=LOCATIONS.map((l,i)=>`
+    <label class="loc ${i===B.locIdx?"sel":""}" onclick="selLoc(${i})">
+      <input type="radio" name="loc" ${i===B.locIdx?"checked":""}>
+      <div><b>${l.name}</b><span class="code">${l.code}</span>
+        <p>${l.addr}<br>${l.ph} · ${l.hrs}</p></div>
+    </label>`).join("");
+  drawSteps(0);go("location");
+}
+function selLoc(i){B.locIdx=i;document.querySelectorAll(".loc").forEach((e,k)=>e.classList.toggle("sel",k===i))}
+function afterLocation(){
+  document.getElementById("vehList").innerHTML=CARS.map((c,i)=>`
+    <div class="vehrow ${i===B.carIdx?"sel":""}">
+      <div class="vehart" style="background:${c.g}"><span>${c.icon}</span></div>
+      <div><span class="vehcls">${c.cls}</span>
+        <div class="vehname">${c.name}</div>
+        <div class="vehmeta">${c.fuel} · ${c.seats} seats</div>
+        <div class="rates"><div>Daily<b>${fmt(c.d)}</b></div><div>Weekly<b>${fmt(c.w)}</b></div><div>Monthly<b>${fmt(c.m)}</b></div></div>
+      </div>
+      <div>${c.st==="ok"
+        ?`<button class="btn ${i===B.carIdx?"btn-green":"btn-primary"}" onclick="selCar(${i})">${i===B.carIdx?"Selected ✓":"Select"}</button>`
+        :c.st==="sold"?`<span class="vehstat sold">Sold</span>`:`<span class="vehstat na">N.A.</span>`}</div>
+    </div>`).join("");
+  drawSteps(1);go("vehicle");
+}
+function selCar(i){B.carIdx=i;afterLocation()}
+function afterVehicle(){drawSteps(2);go("addons")}
+function afterAddons(){
+  B.addons=[];
+  if(document.getElementById("ad-gps").checked)B.addons.push({n:"GPS Navigation System",p:300,q:1});
+  if(document.getElementById("ad-camp").checked)B.addons.push({n:"Camping Kit",p:900,q:1});
+  if(document.getElementById("ad-seat").checked){const q=+document.getElementById("ad-seat-n").value;B.addons.push({n:"Child Seats × "+q,p:100,q:Math.max(0,q-1)})}
+  drawSummary();drawSteps(3);go("customer");
+}
+function totals(){
+  const c=CARS[B.carIdx];const base=c.d*B.days;
+  const add=B.addons.reduce((s,a)=>s+a.p*a.q*B.days,0);
+  return{base,add,tot:base+add};
+}
+function drawSummary(){
+  const l=LOCATIONS[B.locIdx],c=CARS[B.carIdx],t=totals();
+  document.getElementById("sideSummary").innerHTML=`
+    <h4>Your booking</h4>
+    <div class="row"><span>Pick-up</span><div>${document.getElementById("pkDate").value} ${document.getElementById("pkTime").value}<br>${l.name}</div></div>
+    <div class="row"><span>Return</span><div>${document.getElementById("rtDate").value} ${document.getElementById("rtTime").value}</div></div>
+    <div class="row"><span>Vehicle</span><div>${c.cls}<br>${c.name}</div></div>
+    <div class="row"><span>Add-ons</span><div>${B.addons.length?B.addons.map(a=>a.n).join("<br>"):"None"}</div></div>
+    <div class="row"><span>Days</span><div>${B.days}</div></div>
+    <div class="row tot"><span>Estimated</span><b id="sumTot">₹0</b></div>`;
+  /* animate the total counting up */
+  const el=document.getElementById("sumTot"),t0=performance.now();
+  (function tick(ts){const p=Math.min(1,(ts-t0)/900);
+    el.textContent=fmt(Math.round(t.tot*(1-Math.pow(1-p,3))));
+    if(p<1)requestAnimationFrame(tick)})(t0);
+}
+function fillMember(){
+  if(!document.getElementById("memNo").value)return toast("Enter a membership number first");
+  cFirst.value="Asha";cLast.value="Kulkarni";cAddr.value="14, Shivaji Park Road";cCity.value="Mumbai";
+  cEmail.value="asha@example.com";cCell.value="9820012345";cDL.value="MH01 20240012345";
+  toast("Member details loaded");
+}
+function afterCustomer(){
+  const l=LOCATIONS[B.locIdx],c=CARS[B.carIdx],t=totals();
+  document.getElementById("confirmTable").innerHTML=`<table>
+    <tr><th colspan="2">Booking details</th></tr>
+    <tr><td>Pick-up</td><td>${document.getElementById("pkDate").value} ${document.getElementById("pkTime").value} · ${l.name}, ${l.addr}</td></tr>
+    <tr><td>Return</td><td>${document.getElementById("rtDate").value} ${document.getElementById("rtTime").value} · same location</td></tr>
+    <tr><td>Vehicle type</td><td>${c.cls} — ${c.name}</td></tr>
+    <tr><td>Rental add-ons</td><td>${B.addons.length?B.addons.map(a=>a.n).join(", "):"None"}</td></tr>
+    <tr><td>Name</td><td>${cFirst.value||"Asha"} ${cLast.value||"Kulkarni"} · ${cEmail.value||"asha@example.com"} · ${cCell.value||"98200xxxxx"}</td></tr>
+    <tr><td>Driving licence</td><td class="mono">${cDL.value||"MH01 20240012345"}</td></tr>
+    <tr><td><b>Estimated amount</b></td><td class="mono"><b>${fmt(t.tot)}</b> (${B.days} days: base ${fmt(t.base)} + add-ons ${fmt(t.add)})</td></tr>
+  </table>`;
+  drawSteps(4);go("confirm");
+}
+function confirmBooking(){
+  const no="FLE 26 · "+(4000+Math.floor(Math.random()*999));
+  document.getElementById("plateNo").textContent=no;
+  document.getElementById("bkEmail").textContent=cEmail.value||"asha@example.com";
+  document.getElementById("findNo").value=no;
+  /* re-trigger stamp animation */
+  const p=document.getElementById("plateBox");p.style.animation="none";void p.offsetWidth;p.style.animation="";
+  go("booked");confetti();
+}
+function confetti(){
+  const wrap=document.getElementById("bookedCard");
+  const bits=["🟨","🟩","⬛","✨"];
+  for(let i=0;i<26;i++){
+    const s=document.createElement("span");s.className="confetti";s.textContent=bits[i%bits.length];
+    s.style.left=(4+Math.random()*92)+"%";s.style.animationDelay=(Math.random()*.7)+"s";
+    s.style.fontSize=(9+Math.random()*10)+"px";
+    wrap.appendChild(s);setTimeout(()=>s.remove(),3400);
+  }
+}
+
+/* ---------------- MODIFY / CANCEL ---------------- */
+function fetchBooking(){
+  const no=document.getElementById("findNo").value||"FLE 26 · 4821";
+  const l=LOCATIONS[B.locIdx],c=CARS[B.carIdx],t=totals();
+  document.getElementById("fetchedTable").innerHTML=`<table>
+    <tr><th colspan="2">Booking ${no}</th></tr>
+    <tr><td>Status</td><td><b style="color:var(--hwy)">CONFIRMED</b></td></tr>
+    <tr><td>Pick-up</td><td>${document.getElementById("pkDate").value} ${document.getElementById("pkTime").value} · ${l.name}</td></tr>
+    <tr><td>Vehicle</td><td>${c.cls} — ${c.name}</td></tr>
+    <tr><td>Estimated</td><td class="mono">${fmt(t.tot)}</td></tr></table>`;
+  document.getElementById("fetched").style.display="block";
+}
+function openCancel(){document.getElementById("ovCancel").classList.add("on")}
+function doCancel(){ovClose("ovCancel");document.getElementById("fetched").style.display="none";toast("Booking cancelled — vehicle released for further bookings")}
+
+/* ---------------- MEMBERSHIP ---------------- */
+function registerMember(){
+  if(!document.getElementById("mFirst").value)return toast("First name is required");
+  document.getElementById("memResult").style.display="block";
+  toast("Membership number mailed to you");
+}
+
+/* ---------------- STAFF ---------------- */
+let staff=false;
+function staffToggle(){
+  staff=!staff;
+  document.getElementById("staffbar").classList.toggle("on",staff);
+  document.getElementById("staffLink").textContent=staff?"Logout":"Staff Login";
+  toast(staff?"Logged in as staff_mumbai":"Logged out");
+}
+function openHandover(){document.getElementById("ovHandover").classList.add("on")}
+function openReturn(){document.getElementById("ovReturn").classList.add("on")}
+
+drawSteps(0);
+</script>
+</body>
+</html>
