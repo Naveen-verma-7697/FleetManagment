@@ -1,4 +1,4 @@
-# FLEMAN Backend — Full API (Spring Boot, no Lombok)
+# FLEMAN Backend — Full API (Spring Boot)
 
 A complete Spring Boot backend for the FLEMAN/WanderR fleet-rental frontend,
 built to match `frontend/src/data/mockDb.js` and `frontend/src/api/*.js`
