@@ -1,0 +1,19 @@
+## Maven build output
+target/
+bin/
+
+## Eclipse
+.classpath
+.project
+.settings/
+
+## IntelliJ
+.idea/
+*.iml
+
+## Logs
+logs/
+*.log
+
+## Local-only config (contains real secrets — never commit)
+src/main/resources/application.properties

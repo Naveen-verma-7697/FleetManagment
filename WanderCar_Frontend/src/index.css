@@ -1,0 +1,177 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Space Grotesk", sans-serif;
+  --font-sans: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --color-ink: #12151c;
+  --color-steel: #2b3a67;
+  --color-steel-light: #3e4f86;
+  --color-steel-dark: #1f2a4d;
+  --color-primary: #2f6fed;
+  --color-primary-dark: #2557c7;
+  --color-line: #e3e5eb;
+  --color-paper: #fafafc;
+  --color-accent: #ff6b35;
+  --color-danger: #c0392b;
+  --color-success: #1f9d63;
+  --color-warn: #f5a623;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    color: var(--color-ink);
+    background: #fff;
+  }
+}
+
+/* ---------- keyframe animations ported from the prototype ---------- */
+@keyframes dropIn {
+  from {
+    transform: translateY(-32px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes driveInRight {
+  from {
+    transform: translateX(60%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+@keyframes riseIn {
+  from {
+    transform: translateY(48px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes sheenSweep {
+  0% {
+    left: -60%;
+  }
+  35% {
+    left: 130%;
+  }
+  100% {
+    left: 130%;
+  }
+}
+@keyframes screenFade {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes staffSlide {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes tickPop {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@keyframes plateStamp {
+  0% {
+    opacity: 0;
+    transform: scale(1.5) rotate(-3deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.97);
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes modalUp {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.97);
+  }
+}
+@keyframes overlayFade {
+  from {
+    opacity: 0;
+  }
+}
+
+.anim-drop-in {
+  opacity: 0;
+  animation: dropIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.anim-drive-in {
+  opacity: 0;
+  animation: driveInRight 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both;
+}
+.anim-rise-in {
+  animation: riseIn 0.35s ease-out;
+}
+.anim-screen-fade {
+  animation: screenFade 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.anim-staff-slide {
+  animation: staffSlide 0.3s ease;
+}
+.anim-tick-pop {
+  animation: tickPop 0.5s cubic-bezier(0.2, 1.6, 0.4, 1) both 0.1s;
+}
+.anim-plate-stamp {
+  animation: plateStamp 0.55s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+.anim-modal-up {
+  animation: modalUp 0.3s cubic-bezier(0.2, 1.2, 0.4, 1);
+}
+.anim-overlay-fade {
+  animation: overlayFade 0.2s ease;
+}
+
+.card-sheen::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 45%;
+  height: 200%;
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  transform: rotate(8deg);
+  pointer-events: none;
+  z-index: 1;
+  animation: sheenSweep 5.5s ease-in-out infinite;
+}
+
+.suggestions-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.suggestions-scroll::-webkit-scrollbar-thumb {
+  background: rgba(18, 21, 28, 0.15);
+  border-radius: 999px;
+}

@@ -1,0 +1,15 @@
+# Dependencies + build output — the image rebuilds these in the build stage.
+# Leaving node_modules out also avoids shipping host-built native binaries
+# (lightningcss-win32-x64-msvc) into a Linux image.
+node_modules/
+dist/
+
+# VCS + docker meta
+.git/
+.gitignore
+Dockerfile
+.dockerignore
+README.md
+
+# NOTE: .env is deliberately NOT ignored — it holds VITE_API_BASE_URL=/api,
+# which the production build needs. It contains no secrets.

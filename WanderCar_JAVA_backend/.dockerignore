@@ -1,0 +1,17 @@
+# Build output — the image rebuilds these inside the build stage.
+target/
+bin/
+logs/
+
+# Eclipse / IDE metadata
+.settings/
+.classpath
+.project
+.factorypath
+
+# VCS + docker meta
+.git/
+.gitignore
+Dockerfile
+.dockerignore
+README.md

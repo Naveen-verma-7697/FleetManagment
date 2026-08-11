@@ -1,0 +1,154 @@
+name: wandercar
+
+# =====================================================================
+#  WanderCar — MySQL + Java (Spring Boot) + .NET (ASP.NET Core)
+#
+#  Startup order is enforced by health, not by luck:
+#     mysql (healthy)  ->  java-backend (healthy)  ->  dotnet-backend
+#
+#  Both backends own their own schema + seed data. Neither is considered
+#  healthy until GET /api/states returns the seeded rows, so a healthy
+#  stack is proof that MySQL actually received the DataSeeder fixtures.
+# =====================================================================
+
+services:
+
+  # -------------------------------------------------------------------
+  # MySQL 8 — one instance, one database per backend.
+  # -------------------------------------------------------------------
+  mysql:
+    image: mysql:8.0
+    container_name: wandercar-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      TZ: Asia/Kolkata
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      # Numeric offset, not "Asia/Kolkata": the mysql image ships without the
+      # named-timezone tables, and both backends send serverTimezone=Asia/Kolkata.
+      - --default-time-zone=+05:30
+    ports:
+      # 3307 on the host so this never collides with a locally installed MySQL.
+      - "${MYSQL_HOST_PORT:-3307}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      # Creates the empty schemas; only ever runs against a fresh volume.
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 40s
+    networks:
+      - wandercar
+
+  # -------------------------------------------------------------------
+  # Java backend — Spring Boot 3.3 / Java 17, seeds via DataSeeder.java
+  # -------------------------------------------------------------------
+  java-backend:
+    build:
+      context: ./WanderCar_JAVA
+      dockerfile: Dockerfile
+    image: wandercar/java-backend:1.0.0
+    container_name: wandercar-java
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${JAVA_PROFILE:-dev}
+      SERVER_PORT: 8080
+      # Overrides config/application-dev.properties: 'mysql' is the service
+      # name on the compose network, replacing localhost.
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/${JAVA_DB_NAME:-fleetmanagement_dev}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata"
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      # Hibernate builds the tables; DataSeeder then fills them on first boot.
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      TZ: Asia/Kolkata
+      # Mail + Google OAuth intentionally not set here — they fall through to
+      # src/main/resources/application.properties. Uncomment in .env to override.
+      # SPRING_MAIL_USERNAME / SPRING_MAIL_PASSWORD
+      # SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_ID / _CLIENT_SECRET
+    ports:
+      - "${JAVA_HOST_PORT:-8080}:8080"
+    volumes:
+      - java-logs:/app/logs
+    networks:
+      - wandercar
+
+  # -------------------------------------------------------------------
+  # .NET backend — ASP.NET Core 8, seeds via Data/DataSeeder.cs
+  # Waits for java-backend to be healthy because JavaInvoicePdfService
+  # delegates invoice-PDF generation to the Java service (Program.cs:197).
+  # -------------------------------------------------------------------
+  dotnet-backend:
+    build:
+      context: ./WanderCar_DotNet
+      dockerfile: Dockerfile
+    image: wandercar/dotnet-backend:1.0.0
+    container_name: wandercar-dotnet
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      java-backend:
+        condition: service_healthy
+    environment:
+      # Development keeps Swagger mapped (Program.cs:214) and picks up
+      # appsettings.Development.json for mail + Google OAuth.
+      ASPNETCORE_ENVIRONMENT: ${DOTNET_ENVIRONMENT:-Development}
+      ASPNETCORE_URLS: http://+:8080
+      # '__' is the .NET config separator; this wins over appsettings*.json.
+      ConnectionStrings__Default: "server=mysql;port=3306;database=${DOTNET_DB_NAME:-fleetmanagement_dotnet_dev};user=root;password=${MYSQL_ROOT_PASSWORD:-root};TreatTinyAsBoolean=true"
+      JavaMicroservice__BaseUrl: http://java-backend:8080
+      Cors__AllowedOrigin: ${FRONTEND_ORIGIN:-http://localhost:5173}
+      FrontendBaseUrl: ${FRONTEND_ORIGIN:-http://localhost:5173}
+      TZ: Asia/Kolkata
+    ports:
+      # 5180 matches the existing launchSettings.json http profile.
+      - "${DOTNET_HOST_PORT:-5180}:8080"
+    volumes:
+      - dotnet-logs:/app/logs
+    networks:
+      - wandercar
+
+  # -------------------------------------------------------------------
+  # React frontend — built by Vite, served by nginx, which also proxies
+  # /api/* to a backend so the browser only ever talks to one origin.
+  # -------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./WanderCar_Frontend
+      dockerfile: Dockerfile
+      args:
+        # Relative on purpose: nginx decides the real backend at runtime.
+        VITE_API_BASE_URL: /api
+    image: wandercar/frontend:1.0.0
+    container_name: wandercar-frontend
+    restart: unless-stopped
+    depends_on:
+      java-backend:
+        condition: service_healthy
+    environment:
+      # Swap to dotnet-backend:8080 to point the UI at the .NET API.
+      # Runtime-only change — no image rebuild needed.
+      API_UPSTREAM: ${API_UPSTREAM:-java-backend:8080}
+      TZ: Asia/Kolkata
+    ports:
+      # 5173 keeps the origin the backends already allow via Cors:AllowedOrigin.
+      - "${FRONTEND_HOST_PORT:-5173}:8080"
+    networks:
+      - wandercar
+
+volumes:
+  mysql-data:
+  java-logs:
+  dotnet-logs:
+
+networks:
+  wandercar:
+    driver: bridge
