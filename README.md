@@ -1,4 +1,4 @@
-# WanderCar
+# Fleetmanagement
 
 WanderCar (internal codename **Fleman**) is a full-stack car rental / fleet management system: a React frontend backed by two functionally-equivalent REST APIs — a Spring Boot (Java) backend and an ASP.NET Core (.NET) port of the same domain logic. Either backend can run the frontend unmodified.
 
@@ -7,7 +7,7 @@ WanderCar (internal codename **Fleman**) is a full-stack car rental / fleet mana
 ```
 WanderCar/
   WanderCar_Frontend/   React 19 + Vite + Tailwind SPA
-  WanderCar_JAVA/       Spring Boot 3.3 backend (Java 17)
+  WanderCar_JAVA/       Spring Boot 4.0 backend (Java 17,language Java 8)
   WanderCar_DotNet/     ASP.NET Core 8 backend (port of the Java API)
 ```
 
