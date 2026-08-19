@@ -63,6 +63,6 @@ Double-check these are not force-added or already tracked before your first comm
 | Layer | Stack |
 |---|---|
 | Frontend | React 19, Vite, Tailwind CSS 4, React Router 7, Axios |
-| Backend (Java) | Spring Boot 3.3, Spring Data JPA, Spring Security, JJWT, MySQL/H2 |
+| Backend (Java) | Spring Boot 4.0, Spring Data JPA, Spring Security, JJWT, MySQL/H2 |
 | Backend (.NET) | ASP.NET Core 8, EF Core, FluentValidation, AutoMapper, Serilog, MySQL |
 | Auth | JWT (both backends), Google OAuth2 (.NET) |
