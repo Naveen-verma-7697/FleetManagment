@@ -18,8 +18,8 @@ import com.fleman.security.OAuth2SuccessHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 // Spring Security is included only for BCryptPasswordEncoder — real password
 // hashing for Customer.passwordHash — not for endpoint-level authorization.
-// Every endpoint is intentionally left open (permitAll) because the current
-// frontend never attaches a token to its requests (see JwtUtil's note).
+// some endpoint is intentionally left open (permitAll ) because the current
+// frontend never attaches a token to its requests.
 // Adding a JwtAuthFilter that reads Authorization: Bearer <token> and
 // restricts /api/customers/**, /api/bookings/me etc. to the matching
 // customerId is the natural next step, not implemented here to match
