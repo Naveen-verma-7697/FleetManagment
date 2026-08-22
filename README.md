@@ -16,7 +16,7 @@ Each subfolder has its own README with full setup details; this file covers the 
 ## Architecture
 
 - **Frontend** — React 19, React Router, Tailwind CSS, Axios. Talks to whichever backend is running via `VITE_API_BASE_URL` (`/api`, proxied).
-- **Java backend** (`WanderCar_JAVA`) — Spring Boot 4.0, Spring Data JPA, Spring Security (BCrypt), JJWT, MySQL (embedded H2 also supported). Runs on port `8080`.
+- **Java backend** (`WanderCar_JAVA`) — Spring Boot 4.0, Spring Data JPA, Spring Security (BCrypt), JJWT, MySQL . Runs on port `8080`.
 - **.NET backend** (`WanderCar_DotNet`) — ASP.NET Core 8, EF Core (Pomelo MySQL), FluentValidation, AutoMapper, JWT + Google OAuth. Runs on port `5180`/`7156`. Both APIs expose the same route shapes, so the frontend needs no changes to switch between them.
 
 Core domain: states/cities/hubs/airports, car types & vehicles, add-ons, customers, bookings (create/modify/cancel), staff handover/return with invoicing, and JWT-based auth (including Google OAuth on the .NET side).
