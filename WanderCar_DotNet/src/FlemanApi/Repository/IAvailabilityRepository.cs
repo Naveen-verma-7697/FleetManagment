@@ -4,11 +4,7 @@ namespace FlemanApi.Repository;
 
 public record CarTypeCountProjection(long CarTypeId, long TotalCars, long AvailableCars, long BookedCars, long MaintenanceCars);
 
-// Mirrors the custom @Query methods on CarRepository/BookingHeaderRepository
-// that don't fit the generic CRUD shape — category-level capacity/overlap
-// checks shared by VehicleService, BookingService and StaffService's
-// dashboard. (CarRepository.findAvailableCars was defined in Java but never
-// actually called by any service — not ported, since it's dead code there too.)
+
 public interface IAvailabilityRepository
 {
     // Physical fleet size for a (hub, carType) combo, minus anything pulled
