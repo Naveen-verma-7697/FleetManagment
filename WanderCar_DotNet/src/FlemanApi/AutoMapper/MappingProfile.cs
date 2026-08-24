@@ -4,12 +4,6 @@ using FlemanApi.DTO;
 
 namespace FlemanApi.AutoMapper;
 
-// Requirement #10 — every Entity<->DTO mapping used by the generic and
-// domain services lives here. Composite response DTOs (e.g.
-// BookingResponseDTO's nested car/carType/customer/hubs/addonLines) are
-// still assembled by the service layer calling sibling services, matching
-// the Java toResponseDto() approach — AutoMapper only owns the flat
-// Entity<->DTO mappings, not the multi-entity joins.
 public class MappingProfile : Profile
 {
     public MappingProfile()
